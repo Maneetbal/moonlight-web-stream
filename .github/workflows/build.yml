@@ -2,11 +2,7 @@ name: Build Moonlight Web (Windows)
 
 on:
   push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+    branches: [master]
   workflow_dispatch:
 
 jobs:
@@ -17,21 +13,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Rust
+      - name: Install nightly Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly
           override: true
 
-      - name: Set up MSVC environment
-        run: |
-          rustup target add x86_64-pc-windows-msvc
+      - name: Add MSVC target
+        run: rustup target add x86_64-pc-windows-msvc
 
       - name: Build Moonlight Web
-        run: |
-          cargo build --release --target x86_64-pc-windows-msvc
+        run: cargo build --release --target x86_64-pc-windows-msvc
 
-      - name: Upload Artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: moonlight-web-windows
