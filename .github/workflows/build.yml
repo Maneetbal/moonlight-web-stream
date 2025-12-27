@@ -1,40 +1,52 @@
-name: Build Moonlight Web Frontend
+name: Build Moonlight Web (Windows)
 
 on:
-  workflow_dispatch: # manual trigger
-  push:
-    branches:
-      - master
-  pull_request:
+  workflow_dispatch:
 
 jobs:
-  build-frontend:
-    runs-on: ubuntu-latest
+  build-windows:
+    runs-on: windows-latest
 
     steps:
-      # Checkout repository
+      # Checkout the repo
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Setup Node.js
+      # Install Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: '18'
 
-      # Install npm dependencies
-      - name: Install dependencies
-        run: npm ci
+      # Install Rust
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      # Install dependencies
+      - name: Install Node dependencies
+        run: npm install --legacy-peer-deps
         working-directory: moonlight-web/web-server
 
-      # Build frontend
+      # Build frontend (TypeScript + static files)
       - name: Build frontend
         run: npm run build-light
         working-directory: moonlight-web/web-server
 
-      # Upload the built dist folder as an artifact (v4)
-      - name: Upload artifact
+      # Build Rust binaries
+      - name: Build Rust Moonlight binaries
+        run: |
+          rustup target add x86_64-pc-windows-gnu
+          cargo build --release --target x86_64-pc-windows-gnu
+        working-directory: .
+
+      # Archive artifacts
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: moonlight-web-frontend
-          path: moonlight-web/web-server/dist
+          name: moonlight-web-windows
+          path: |
+            moonlight-web/web-server/dist
+            target/x86_64-pc-windows-gnu/release/*.exe
