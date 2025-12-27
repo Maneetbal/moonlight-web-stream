@@ -14,13 +14,14 @@ jobs:
         with:
           node-version: 18
 
-      - uses: dtolnay/rust-toolchain@stable
+      # 🔥 Nightly is REQUIRED
+      - uses: dtolnay/rust-toolchain@nightly
 
-      # 🔹 Build backend FIRST (this generates api_bindings.js)
+      # Build Rust backend (generates bindings)
       - name: Build Rust backend
         run: cargo build --release
 
-      # 🔹 Now build the web server
+      # Build web frontend
       - name: Build web frontend
         working-directory: moonlight-web/web-server
         run: |
