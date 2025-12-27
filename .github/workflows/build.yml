@@ -1,4 +1,4 @@
-name: Build Moonlight Web
+name: Build Moonlight Web (Windows)
 
 on:
   push:
@@ -7,38 +7,32 @@ on:
   pull_request:
     branches:
       - master
-  workflow_dispatch:  # allows manual trigger
+  workflow_dispatch:
 
 jobs:
   build-windows:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
         with:
-          node-version: 18
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
+          toolchain: stable
           override: true
 
-      - run: rustup target add x86_64-pc-windows-gnu
+      - name: Set up MSVC environment
+        run: |
+          rustup target add x86_64-pc-windows-msvc
 
-      - run: cargo build --release --target x86_64-pc-windows-gnu
-        working-directory: .
+      - name: Build Moonlight Web
+        run: |
+          cargo build --release --target x86_64-pc-windows-msvc
 
-      - run: npm install --legacy-peer-deps
-        working-directory: moonlight-web/web-server
-
-      - run: npm run build-light
-        working-directory: moonlight-web/web-server
-
-      - uses: actions/upload-artifact@v4
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: moonlight-web-windows
-          path: |
-            moonlight-web/web-server/dist
-            target/x86_64-pc-windows-gnu/release/*.exe
+          path: target/x86_64-pc-windows-msvc/release/
