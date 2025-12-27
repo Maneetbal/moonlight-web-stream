@@ -1,0 +1,33 @@
+name: Build Moonlight Web (Windows)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build frontend
+        working-directory: moonlight-web/web-server
+        run: |
+          npm install
+          npm run build-light
+
+      - name: Build backend
+        run: cargo build --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: moonlight-web-windows
+          path: |
+            target/release/*.exe
+            moonlight-web/web-server/dist
