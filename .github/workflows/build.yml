@@ -16,14 +16,16 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: Build frontend
+      # 🔹 Build backend FIRST (this generates api_bindings.js)
+      - name: Build Rust backend
+        run: cargo build --release
+
+      # 🔹 Now build the web server
+      - name: Build web frontend
         working-directory: moonlight-web/web-server
         run: |
           npm install
           npm run build-light
-
-      - name: Build backend
-        run: cargo build --release
 
       - uses: actions/upload-artifact@v4
         with:
