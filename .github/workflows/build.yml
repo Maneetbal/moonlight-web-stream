@@ -1,19 +1,13 @@
-name: Build Moonlight Web (Windows)
-
-on:
-  push:
-    branches: [master]
-  workflow_dispatch:
-
 jobs:
-  build-windows:
+  build:
     runs-on: windows-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout repository with submodules
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-      - name: Install nightly Rust
+      - name: Install Rust nightly
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
@@ -24,9 +18,3 @@ jobs:
 
       - name: Build Moonlight Web
         run: cargo build --release --target x86_64-pc-windows-msvc
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: moonlight-web-windows
-          path: target/x86_64-pc-windows-msvc/release/
