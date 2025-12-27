@@ -1,0 +1,43 @@
+name: Build Moonlight Web
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Install Rust nightly
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: nightly
+    
+    - name: Install LLVM
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: "17"
+    
+    - name: Build release
+      run: cargo build --release
+    
+    - name: Upload web-server
+      uses: actions/upload-artifact@v4
+      with:
+        name: moonlight-web-server
+        path: target/release/web-server.exe
+    
+    - name: Upload streamer
+      uses: actions/upload-artifact@v4
+      with:
+        name: moonlight-streamer
+        path: target/release/streamer.exe
