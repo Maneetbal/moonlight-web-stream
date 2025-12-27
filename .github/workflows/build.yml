@@ -1,3 +1,14 @@
+name: Build Moonlight Web
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:  # allows manual trigger
+
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -14,18 +25,14 @@ jobs:
           toolchain: nightly
           override: true
 
-      # Install Rust target
       - run: rustup target add x86_64-pc-windows-gnu
 
-      # Build Rust bindings (this generates api_bindings.js)
       - run: cargo build --release --target x86_64-pc-windows-gnu
         working-directory: .
 
-      # Install Node deps
       - run: npm install --legacy-peer-deps
         working-directory: moonlight-web/web-server
 
-      # Build frontend now that bindings exist
       - run: npm run build-light
         working-directory: moonlight-web/web-server
 
